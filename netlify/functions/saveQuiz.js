@@ -1,34 +1,31 @@
-const { Octokit } = require("@octokit/rest")
+exports.handler = async function(event){
 
-exports.handler = async (event) => {
-
-const github = new Octokit({
-auth: process.env.GITHUB_TOKEN
-})
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+const repo = "USERNAME/my-new-site"
+const path = "summaries.json"
 
 const data = JSON.parse(event.body)
 
-const content = Buffer.from(JSON.stringify(data,null,2)).toString("base64")
-
-// هات الملف القديم
-const { data: file } = await github.repos.getContent({
-owner: "YOUR_USERNAME",
-repo: "YOUR_REPO",
-path: "quiz.json"
+const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+headers:{ Authorization:`token ${GITHUB_TOKEN}` }
 })
 
-// تحديث الملف
-await github.repos.createOrUpdateFileContents({
-owner: "YOUR_USERNAME",
-repo: "YOUR_REPO",
-path: "quiz.json",
-message: "update quiz",
-content: content,
-sha: file.sha
+const file = await res.json()
+
+const updatedContent = Buffer.from(JSON.stringify(data,null,2)).toString("base64")
+
+await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+method:"PUT",
+headers:{
+Authorization:`token ${GITHUB_TOKEN}`,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"update",
+content:updatedContent,
+sha:file.sha
+})
 })
 
-return {
-statusCode: 200,
-body: "done"
-}
+return {statusCode:200,body:"done"}
 }
