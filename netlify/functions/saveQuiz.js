@@ -1,7 +1,7 @@
 exports.handler = async function(event){
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-const repo = "USERNAME/my-new-site"
+const repo = "youssef86686-prog/Acdimac-web"
 const path = "summaries.json"
 
 const data = JSON.parse(event.body)
